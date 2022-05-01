@@ -1,0 +1,77 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Creates the resources needed to export CloudWatch Logs to S3
+
+Parameters:
+  BucketLambdaTemplateURL:
+    Type: String
+  DescribeLogGroupsLambdaTemplateURL:
+    Type: String
+  CreateExportTaskLambdaTemplateURL:
+    Type: String
+  DescribeExportTaskLambdaTemplateURL:
+    Type: String
+  StepFunctionsStateMachineTemplateURL:
+    Type: String
+  EventRuleTemplateURL:
+    Type: String
+  LambdaBucket:
+    Type: String
+  CreateExportTaskLambdaCode:
+    Type: String
+  DescribeExportTaskLambdaCode: 
+    Type: String
+  DescribeLogGroupsLambdaCode:
+    Type: String
+
+Resources:
+  CloudWatchLogsBucket:
+    Type: "AWS::CloudFormation::Stack"
+    Properties:
+      TemplateURL: !Ref BucketLambdaTemplateURL
+  
+  DescribeLogGroupsLambda:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref DescribeLogGroupsLambdaTemplateURL
+      Parameters:
+        S3BucketParam: !Ref LambdaBucket
+        S3KeyParam: !Ref DescribeLogGroupsLambdaCode
+
+  CreateExportTaskLambda:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref CreateExportTaskLambdaTemplateURL
+      Parameters:
+        BucketName: !GetAtt CloudWatchLogsBucket.Outputs.BucketName
+        S3BucketParam: !Ref LambdaBucket
+        S3KeyParam: !Ref CreateExportTaskLambdaCode
+    DependsOn: CloudWatchLogsBucket
+  
+  DescribeExportTaskLambda:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref DescribeExportTaskLambdaTemplateURL
+      Parameters:
+        S3BucketParam: !Ref LambdaBucket
+        S3KeyParam: !Ref DescribeExportTaskLambdaCode
+
+  StepFunctionsStateMachine:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref StepFunctionsStateMachineTemplateURL
+      Parameters:
+        DescribeLogGroupsLambdaArn: !GetAtt DescribeLogGroupsLambda.Outputs.Arn
+        CreateExportTaskLambdaArn: !GetAtt CreateExportTaskLambda.Outputs.Arn
+        DescribeExportTaskLambdaArn: !GetAtt DescribeExportTaskLambda.Outputs.Arn
+    DependsOn:
+      - DescribeLogGroupsLambda
+      - CreateExportTaskLambda
+      - DescribeExportTaskLambda
+
+  EventRule:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref EventRuleTemplateURL
+      Parameters:
+        StepFunctionsStateMachineArn: !GetAtt StepFunctionsStateMachine.Outputs.Arn
+    DependsOn: StepFunctionsStateMachine

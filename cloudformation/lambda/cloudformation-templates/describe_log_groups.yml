@@ -1,0 +1,60 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Lambda function with cfn-response.
+
+Parameters:
+  S3BucketParam:
+    Type: String
+  S3KeyParam:
+    Type: String
+
+Resources:
+  DescribeLogGroupsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: DescribeLogGroups
+      Runtime: python3.9
+      Timeout: 900
+      Role: 
+        Fn::GetAtt: 
+          - "LambdaExecutionRole"
+          - "Arn"
+      Handler: describe_log_groups.lambda_handler
+      Code:
+        S3Bucket:
+          !Ref S3BucketParam
+        S3Key:
+          !Ref S3KeyParam
+
+      Description: Invoke a function during stack creation.
+      TracingConfig:
+        Mode: Active
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CloudWatchLogsDescribeExportTasks
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+            - Effect: Allow
+              Action:
+                - "logs:CreateLogStream"
+                - "logs:PutLogEvents"
+                - "logs:DescribeLogGroups"
+              Resource: "*"
+
+Outputs:
+  Arn:
+    Description: The ARN of the Lambda function that describes log groups.
+    Value: !GetAtt DescribeLogGroupsLambda.Arn
+    Export:
+      Name: DescribeLogGroupsLambda

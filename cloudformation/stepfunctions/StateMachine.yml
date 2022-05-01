@@ -1,0 +1,137 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: ""
+Parameters:
+  DescribeLogGroupsLambdaArn:
+    Type: String
+    Description: 'The ARN of the Lambda function that describes log groups.'
+  CreateExportTaskLambdaArn: 
+    Type: String
+    Description: 'The ARN of the Lambda function that create export task.'
+  DescribeExportTaskLambdaArn: 
+    Type: String
+    Description: 'The ARN of the Lambda function that describes export task.'
+Resources:
+  ExportLogsToS3StateMachine:
+    Type: AWS::StepFunctions::StateMachine
+    Properties:
+      StateMachineName: ExportLogsToS3
+      DefinitionString: !Sub |
+        {
+          "StartAt": "Initialize",
+          "TimeoutSeconds": 600,
+          "States": {
+            "Initialize": {
+              "Type": "Task",
+              "Resource": "${DescribeLogGroupsLambdaArn}",
+              "ResultPath": "$.log_groups_info",
+              "Next": "CreateExportTask"
+            },
+            "CreateExportTask": {
+              "Type": "Task",
+              "Resource": "${CreateExportTaskLambdaArn}",
+              "ResultPath": "$.log_groups_info",
+              "Next": "WaitFiveSeconds"
+            },
+            "DescribeExportTasks": {
+              "Type": "Task",
+              "Resource": "${DescribeExportTaskLambdaArn}",
+              "ResultPath": "$.describe_export_task",
+              "Next": "CheckStatusCode"
+            },
+            "CheckStatusCode": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.describe_export_task.status_code",
+                  "StringEquals": "COMPLETED",
+                  "Next": "IsAllLogsExported?"
+                },
+                {
+                  "Or": [
+                    {
+                      "Variable": "$.describe_export_task.status_code",
+                      "StringEquals": "PENDING"
+                    },
+                    {
+                      "Variable": "$.describe_export_task.status_code",
+                      "StringEquals": "RUNNING"
+                    }
+                  ],
+                  "Next": "WaitFiveSeconds"
+                }
+              ],
+              "Default": "ExportFailed"
+            },
+            "WaitFiveSeconds": {
+              "Type": "Wait",
+              "Seconds": 5,
+              "Next": "DescribeExportTasks"
+            },
+            "IsAllLogsExported?": {
+              "Type": "Choice",
+              "Choices": [
+                {
+                  "Variable": "$.log_groups_info.completed_flag",
+                  "BooleanEquals": true,
+                  "Next": "Done"
+                }
+              ],
+              "Default": "CreateExportTask"
+            },
+            "Done": {
+              "Type": "Succeed"
+            },
+            "ExportFailed": {
+              "Type": "Fail"
+            }
+          }
+        }
+
+      RoleArn:
+        Fn::GetAtt: 
+          - "StepFunctionsIAMRole"
+          - "Arn"
+
+  StepFunctionsIAMRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - states.amazonaws.com
+          Action: sts:AssumeRole
+      Policies:
+      - PolicyName: CloudWatchLogsDeliveryFullAccessPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - "logs:CreateLogDelivery"
+            - "logs:GetLogDelivery"
+            - "logs:UpdateLogDelivery"
+            - "logs:DeleteLogDelivery"
+            - "logs:ListLogDeliveries"
+            - "logs:PutResourcePolicy"
+            - "logs:DescribeResourcePolicies"
+            - "logs:DescribeLogGroups"
+            Resource: "*"
+      - PolicyName: LambdaInvokeScopedAccessPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+          - Effect: Allow
+            Action:
+            - "lambda:InvokeFunction"
+            Resource:
+            - !Ref DescribeLogGroupsLambdaArn
+            - !Ref CreateExportTaskLambdaArn
+            - !Ref DescribeExportTaskLambdaArn
+
+Outputs:
+  Arn:
+    Value: !Ref ExportLogsToS3StateMachine
+    Description: "The Arn of ExportLogsToS3StateMachine"

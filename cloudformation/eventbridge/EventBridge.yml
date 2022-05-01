@@ -1,0 +1,44 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+        This stack shows how to build your own EventBridge bus
+
+Parameters:
+  StepFunctionsStateMachineArn:
+    Type: String
+    Description: The StepFunctions StateMachine Arn to set target
+
+Resources:
+  ScheduledStateMachineExecutionRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: ""
+      EventBusName: default
+      ScheduleExpression: "cron(0 21 * * ? *)"
+      State: ENABLED
+      Targets:
+        - Arn: !Ref StepFunctionsStateMachineArn
+          Id: 'StepFunctionsStateMachine'
+          RoleArn: !GetAtt
+            - EventBridgeIAMrole
+            - Arn
+
+  EventBridgeIAMrole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: !Sub events.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: InvokeStepFunctions
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'states:StartExecution'
+                Resource: !Ref StepFunctionsStateMachineArn

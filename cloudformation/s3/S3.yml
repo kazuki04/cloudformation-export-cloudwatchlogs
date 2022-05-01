@@ -1,0 +1,70 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create S3 bucket for exporting logs
+
+# Parameters:
+#   BucketName:
+#     Type: String
+#     # Default: "cloudwatch-logs-exported-to-s3-20220330"
+#     Description: A name for the logs bucket.
+#     Default: !Join
+#       - "-"
+#       - - "cloudwatchlogs"
+#         - !Select
+#           - 0
+#           - !Split
+#             - "-"
+#             - !Select
+#               - 2
+#               - !Split
+#                 - "/"
+                # - !Ref "AWS::StackId"
+
+Resources:
+  CloudWatchLogsBucket:
+    Type: "AWS::S3::Bucket"
+    # DeletionPolicy: Retain
+    Properties:
+      # BucketName: !Ref BucketName
+      BucketName: !Join
+        - "-"
+        - - "cloudwatchlogs"
+          - !Select
+            - 0
+            - !Split
+              - "-"
+              - !Select
+                - 2
+                - !Split
+                  - "/"
+                  - !Ref "AWS::StackId"
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      VersioningConfiguration:
+        Status: Enabled
+
+  S3BucketPolicy:
+    Type: 'AWS::S3::BucketPolicy'
+    Properties:
+      Bucket: !Ref CloudWatchLogsBucket
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Action: "s3:GetBucketAcl"
+            Effect: Allow
+            Resource: !GetAtt CloudWatchLogsBucket.Arn
+            Principal:
+              Service:
+              - logs.ap-northeast-1.amazonaws.com
+          - Action: "s3:PutObject"
+            Effect: Allow
+            Resource: !Sub 'arn:aws:s3:::${CloudWatchLogsBucket}/*'
+            Principal:
+              Service:
+              - logs.ap-northeast-1.amazonaws.com
+Outputs:
+  BucketName:
+    # Value: !Ref BucketName
+    Value: !Ref CloudWatchLogsBucket
+    Description: "Bucket name"
