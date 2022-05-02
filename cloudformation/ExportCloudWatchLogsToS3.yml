@@ -12,7 +12,7 @@ Parameters:
     Type: String
   StepFunctionsStateMachineTemplateURL:
     Type: String
-  EventRuleTemplateURL:
+  CronExportLogsEventRuleURL:
     Type: String
   LambdaBucket:
     Type: String
@@ -68,7 +68,15 @@ Resources:
       - CreateExportTaskLambda
       - DescribeExportTaskLambda
 
-  EventRule:
+  CronExportLogsEventRule:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref CronExportLogsEventRuleURL 
+      Parameters:
+        StepFunctionsStateMachineArn: !GetAtt StepFunctionsStateMachine.Outputs.Arn
+    DependsOn: StepFunctionsStateMachine
+
+  FailOrTimeOutNotificationEventRule:
     Type: AWS::CloudFormation::Stack
     Properties:
       TemplateURL: !Ref EventRuleTemplateURL
