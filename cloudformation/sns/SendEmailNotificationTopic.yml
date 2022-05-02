@@ -1,0 +1,16 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Template to create sns topic and subscription
+
+Parameters:
+  EmailAddress:
+    Type: String
+    Description: Email address for endpoint
+
+Resources:
+  SendEmailNotificationTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      Subscription:
+        - Endpoint: !Ref EmailAddress
+          Protocol: "email"
+      TopicName: "send_email_notification"

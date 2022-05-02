@@ -14,6 +14,10 @@ Parameters:
     Type: String
   CronExportLogsEventRuleURL:
     Type: String
+  SendEmailNotificationURL:
+    Type: String
+  EmailAddress:
+    Type: String
   LambdaBucket:
     Type: String
   CreateExportTaskLambdaCode:
@@ -68,6 +72,12 @@ Resources:
       - CreateExportTaskLambda
       - DescribeExportTaskLambda
 
+  SendEmailNotification:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Ref SendEmailNotificationURL
+      EmailAddress: !Ref EmailAddress
+
   CronExportLogsEventRule:
     Type: AWS::CloudFormation::Stack
     Properties:
@@ -82,4 +92,6 @@ Resources:
       TemplateURL: !Ref EventRuleTemplateURL
       Parameters:
         StepFunctionsStateMachineArn: !GetAtt StepFunctionsStateMachine.Outputs.Arn
-    DependsOn: StepFunctionsStateMachine
+    DependsOn:
+      - StepFunctionsStateMachine
+      - SendEmailNotification
