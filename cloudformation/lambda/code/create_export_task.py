@@ -14,7 +14,6 @@ def specify_time_range_for_export(today: datetime.date) -> Tuple[int, int]:
     from_time = today_datetime - datetime.timedelta(days=1, hours=9)
     to_time = today_datetime - datetime.timedelta(hours=9)
 
-    # create_export_taskでは、時刻をmillisecondsで表す必要があるためキャストしている
     milliseconds_from_time = int(from_time.timestamp() * 1000)
     milliseconds_to_time = int(to_time.timestamp() * 1000)
 
