@@ -19,6 +19,8 @@ Resources:
       EventPattern:
         source:
           - aws.states
+        detail-type:
+          - Step Functions Execution Status Change
         detail:
           status:
             - "TIMED_OUT"

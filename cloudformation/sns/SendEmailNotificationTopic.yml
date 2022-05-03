@@ -15,6 +15,24 @@ Resources:
           Protocol: "email"
       TopicName: "send_email_notification"
 
+  SendEmailNotificationTopicPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      Topics:
+        - !Ref SendEmailNotificationTopic
+      PolicyDocument:
+        Id: SendEmailNotificationTopicPolicy
+        Version: '2012-10-17'
+        Statement:
+          - Sid: Stmt1643807474528
+            Effect: Allow
+            Principal:
+              Service: events.amazonaws.com
+            Action:
+              - sns:Publish
+            Resource: !Ref SendEmailNotificationTopic
+    DependsOn: SendEmailNotificationTopic
+
 Outputs:
   Arn:
     Description: The ARN of the Lambda function that describes log groups.
