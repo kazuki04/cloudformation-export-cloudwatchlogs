@@ -14,3 +14,10 @@ Resources:
         - Endpoint: !Ref EmailAddress
           Protocol: "email"
       TopicName: "send_email_notification"
+
+Outputs:
+  Arn:
+    Description: The ARN of the Lambda function that describes log groups.
+    Value: !Ref SendEmailNotificationTopic
+    Export:
+      Name: SendEmailNotificationTopic

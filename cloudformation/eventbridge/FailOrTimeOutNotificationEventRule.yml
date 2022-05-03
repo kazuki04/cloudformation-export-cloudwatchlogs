@@ -1,0 +1,31 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >
+        This stack shows how to build your own EventBridge bus
+
+Parameters:
+  StepFunctionsStateMachineArn:
+    Type: String
+    Description: The StepFunctions StateMachine Arn to set target
+  SendEmailNotificationTopicArn:
+    Type: String
+
+Resources:
+  FailOrTimeOutNotificationEventRule:
+    Type: 'AWS::Events::Rule'
+    Properties:
+      Description: ""
+      EventBusName: default
+      EventPattern:
+        source:
+          - aws.states
+        detail:
+          status:
+            - "TIMED_OUT"
+            - "FAILED"
+          stateMachineArn:
+            - !Ref StepFunctionsStateMachineArn
+      State: ENABLED
+      Targets:
+        - Arn: !Ref SendEmailNotificationTopicArn
+          Id: FailOrTimeOutNotificationEventRule
