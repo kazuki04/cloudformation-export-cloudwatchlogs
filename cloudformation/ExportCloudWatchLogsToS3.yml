@@ -28,6 +28,8 @@ Parameters:
     Type: String
   DescribeLogGroupsLambdaCode:
     Type: String
+  TargetLogGroupPrefix:
+    Type: String
 
 Resources:
   CloudWatchLogsBucket:
@@ -42,6 +44,7 @@ Resources:
       Parameters:
         S3BucketParam: !Ref LambdaBucket
         S3KeyParam: !Ref DescribeLogGroupsLambdaCode
+        TargetLogGroupPrefix: !Ref TargetLogGroupPrefix
 
   CreateExportTaskLambda:
     Type: AWS::CloudFormation::Stack

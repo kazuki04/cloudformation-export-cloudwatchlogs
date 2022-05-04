@@ -6,6 +6,8 @@ Parameters:
     Type: String
   S3KeyParam:
     Type: String
+  TargetLogGroupPrefix:
+    Type: String
 
 Resources:
   DescribeLogGroupsLambda:
@@ -18,6 +20,9 @@ Resources:
         Fn::GetAtt: 
           - "LambdaExecutionRole"
           - "Arn"
+      Environment:
+        Variables:
+          TARGET_LOG_GROUP_PREFIX: !Ref TargetLogGroupPrefix
       Handler: describe_log_groups.lambda_handler
       Code:
         S3Bucket:
