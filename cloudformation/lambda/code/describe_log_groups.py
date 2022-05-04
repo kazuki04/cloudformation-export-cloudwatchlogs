@@ -13,7 +13,8 @@ def describe_log_group_name():
 
     for log_group in response["logGroups"]:
         TARGET_LOG_GROUPS.append(
-            {   "log_group_name": log_group["logGroupName"],
+            {
+                "log_group_name": log_group["logGroupName"],
                 "prefix": log_group["logGroupName"]
             }
         )
