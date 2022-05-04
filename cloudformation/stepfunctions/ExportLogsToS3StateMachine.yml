@@ -1,5 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: ""
+Description: "This stack creates state machine"
+
 Parameters:
   DescribeLogGroupsLambdaArn:
     Type: String
@@ -10,6 +11,7 @@ Parameters:
   DescribeExportTaskLambdaArn: 
     Type: String
     Description: 'The ARN of the Lambda function that describes export task.'
+
 Resources:
   ExportLogsToS3StateMachine:
     Type: AWS::StepFunctions::StateMachine

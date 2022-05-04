@@ -1,7 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: >
-        This stack shows how to build your own EventBridge bus
+Description: This stack shows how to build your own EventBridge bus
 
 Parameters:
   StepFunctionsStateMachineArn:

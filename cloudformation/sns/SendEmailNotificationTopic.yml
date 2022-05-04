@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Template to create sns topic and subscription
+Description: This stack creates sns topic and subscription
 
 Parameters:
   EmailAddress:
