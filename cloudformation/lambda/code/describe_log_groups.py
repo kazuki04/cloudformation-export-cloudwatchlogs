@@ -5,7 +5,7 @@ TARGET_LOG_GROUPS = []
 
 
 def describe_log_group_name():
-    prefix = '/aws/lambda/test'
+    prefix = '/cloudwatch_logs/lambda'
 
     response = logs_client.describe_log_groups(
         logGroupNamePrefix=prefix
@@ -13,8 +13,9 @@ def describe_log_group_name():
 
     for log_group in response["logGroups"]:
         TARGET_LOG_GROUPS.append(
-            {"log_group_name": log_group["logGroupName"],
-                "prefix": log_group["logGroupName"]}
+            {   "log_group_name": log_group["logGroupName"],
+                "prefix": log_group["logGroupName"]
+            }
         )
 
 
