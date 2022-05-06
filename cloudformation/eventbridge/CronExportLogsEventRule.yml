@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: This stack shows how to build your own EventBridge bus
+Description: This stack create event rule to execute state machine daily
 
 Parameters:
   StepFunctionsStateMachineArn:
@@ -11,7 +11,7 @@ Resources:
   ScheduledStateMachineExecutionRule:
     Type: 'AWS::Events::Rule'
     Properties:
-      Description: ""
+      Description: "This event rule execute state machine daily"
       EventBusName: default
       ScheduleExpression: "cron(0 21 * * ? *)"
       State: ENABLED

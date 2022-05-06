@@ -1,14 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: CreateExportTaskLambda function.
+Description: This stack create CreateExportTaskLambda function.
 
 Parameters:
   BucketName:
     Type: String
-    Description: A name for the logs bucket.
+    Description: Name for the logs bucket.
   S3BucketParam:
     Type: String
+    Description: Name of bucket which the lambda code is stored
   S3KeyParam:
     Type: String
+    Description: The object key prefix
 
 Resources:
   CreateExportTaskLambda:

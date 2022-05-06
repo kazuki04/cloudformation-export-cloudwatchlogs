@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 
-Description: This stack create event bridge rule to publish message to sns topic when step functions fails or times out
+Description: This stack create event rule to publish the message when the state machine fails or time out
 
 Parameters:
   StepFunctionsStateMachineArn:
@@ -8,12 +8,13 @@ Parameters:
     Description: The StepFunctions StateMachine Arn to set target
   SendEmailNotificationTopicArn:
     Type: String
+    Description: An arn of sns topic for the target
 
 Resources:
   FailOrTimeOutNotificationEventRule:
     Type: 'AWS::Events::Rule'
     Properties:
-      Description: ""
+      Description: "This event rule is triggered when the state machine fails or time out"
       EventBusName: default
       EventPattern:
         source:

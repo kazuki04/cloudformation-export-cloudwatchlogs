@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Create S3 bucket for exporting logs
+Description: This stack create S3 bucket for exporting logs
 
 Resources:
   CloudWatchLogsBucket:
@@ -47,4 +47,4 @@ Resources:
 Outputs:
   BucketName:
     Value: !Ref CloudWatchLogsBucket
-    Description: "Bucket name"
+    Description: "Name for the logs bucket."

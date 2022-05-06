@@ -1,13 +1,16 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: DescribeLogGroupsLambda function.
+Description: This stack create DescribeLogGroupsLambda function.
 
 Parameters:
   S3BucketParam:
     Type: String
+    Description: Name of bucket which the lambda code is stored
   S3KeyParam:
     Type: String
+    Description: The object key prefix
   TargetLogGroupPrefix:
     Type: String
+    Description: Prefix of the log group to be exported
 
 Resources:
   DescribeLogGroupsLambda:
